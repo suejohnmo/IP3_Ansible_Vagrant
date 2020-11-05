@@ -1,1 +1,22 @@
-yoloserver ansible_host=127.0.0.1 ansible_port=2222
+# Client server
+[client]
+192.168.60.4
+
+# Backend server
+[backend]
+192.168.60.4
+
+# Database server
+[db]
+192.168.60.5
+
+# Group 'multi' with all servers
+[multi:childres]
+client
+backend
+db
+
+# Variables that will be applied to all servers
+[multi:vars]
+ansible_port=2222
+ansible_ssh_user=vagrant
