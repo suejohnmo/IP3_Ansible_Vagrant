@@ -2,12 +2,12 @@
 - hosts: all
   become: yes
 
-  #  vars_files:
-  #        - vars.yaml
+  # vars:
+  #       - vars.yaml
 
   pre_tasks:
           - name: Update apt cache if needed
-            apt: "update_cache=yes cache_valid_time=3600"
+            apt: "update_cache=yes cache_valid_time=14400"
          
           # - debug: var=repo_stat
           - name: Check if the git repository exists
@@ -42,8 +42,54 @@
                             chdir=/home/vagrant/client
                             npm install
 
-                  - name: Start the app
+                  - name: Install PM2 (to run our client app)
                     command: >
-                            chdir=/home/vagrant/client 
-                            npm start &
+                            chdir=/home/vagrant/client
+                            npm install pm2 -g
 
+                  - name: Configure PM2 to start automatically on system bootup
+                    command: pm2 startup
+
+                  - name: Start the client app using PM2
+                    command: pm2 start --name yolo_app npm -- start
+
+                  - name: Save the list of process for automatic restart after a system reboot
+                    command: pm2 save
+            when: inventory_hostname == "client"
+
+          # Install nodejs and npm on the backend host
+          - block: 
+                  - name: Install nodejs and npm on the backend host
+                    apt:
+                           state: present
+                           name:
+                                  - nodejs
+                                  - npm
+
+                  - name: Check git repo folder exists.
+                    stat: path=/opt/yolo/backend
+                    register: git_stat
+
+                  - name: Copy the backend directory to vagrant home directory
+                    command: mv /opt/yolo/backend /home/vagrant
+                    when: git_stat.stat.exists
+
+                  - name: Install required modules in package.json
+                    command: >
+                            chdir=/home/vagrant/backend
+                            npm install
+
+                  - name: Install PM2 (to run our app)
+                    command: >
+                            chdir=/home/vagrant/backend
+                            npm install pm2 -g
+
+                  - name: Configure PM2 to start automatically on system bootup
+                    command: pm2 startup
+
+                  - name: Start the client app using PM2
+                    command: pm2 start --name yolo_app npm -- start
+
+                  - name: Save the list of process for automatic restart after a system reboot
+                    command: pm2 save
+            when: inventory_hostname == "backend"
