@@ -47,11 +47,20 @@
                             chdir=/home/vagrant/client
                             npm install pm2 -g
 
+                  - name: Spawn pm2 to become active
+                    become: yes
+                    become_user: vagrant
+                    command: pm2 list
+
                   - name: Configure PM2 to start automatically on system bootup
                     command: pm2 startup
 
                   - name: Start the client app using PM2
-                    command: pm2 start --name yolo_app npm -- start
+                    become: yes
+                    become_user: vagrant
+                    command: >
+                            chdir=/home/vagrant/client
+                            pm2 start --name yolo_app npm -- start
 
                   - name: Save the list of process for automatic restart after a system reboot
                     command: pm2 save
@@ -86,8 +95,11 @@
 
                   - name: Configure PM2 to start automatically on system bootup
                     command: pm2 startup
+                  
+                  - name: Configure PM2 to start automatically on system bootup
+                    command: pm2 list
 
-                  - name: Start the client app using PM2
+                  - name: Start the backend using PM2
                     command: pm2 start --name yolo_app npm -- start
 
                   - name: Save the list of process for automatic restart after a system reboot
