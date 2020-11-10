@@ -29,6 +29,7 @@
                            name:
                                   - nodejs
                                   - npm
+                                  - build-essential
                   - name:  Check git repo folder exists.
                     stat: path=/opt/yolo/client
                     register: git_stat
@@ -42,28 +43,27 @@
                             chdir=/home/vagrant/client
                             npm install
 
-                  - name: Install PM2 (to run our client app)
+                  - name: Run NPM for production
                     command: >
                             chdir=/home/vagrant/client
-                            npm install pm2 -g
+                            npm run build
 
-                  - name: Spawn pm2 to become active
-                    become: yes
-                    become_user: vagrant
-                    command: pm2 list
-
-                  - name: Configure PM2 to start automatically on system bootup
-                    command: pm2 startup
-
-                  - name: Start the client app using PM2
-                    become: yes
-                    become_user: vagrant
+                  - name: Install serve module
                     command: >
                             chdir=/home/vagrant/client
-                            pm2 start --name yolo_app npm -- start
+                            npm install -g serve
 
-                  - name: Save the list of process for automatic restart after a system reboot
-                    command: pm2 save
+                  - name: Create nohup.out file
+                    file:
+                            path: "/home/vagrant/nohup.out"
+                            state: touch
+
+                  - name: Start the client app
+                    shell:
+                            " nohup serve -s build -l 3000 </dev/null >/dev/null 2>&1 & "
+                    args: 
+                            chdir: "/home/vagrant/client"
+
             when: inventory_hostname == "client"
 
           # Install nodejs and npm on the backend host
@@ -93,15 +93,41 @@
                             chdir=/home/vagrant/backend
                             npm install pm2 -g
 
-                  - name: Configure PM2 to start automatically on system bootup
-                    command: pm2 startup
+                  - name: Spawn PM2 to become active
+                    become: yes
+                    become_user: vagrant
+                    command: pm2 list
                   
                   - name: Configure PM2 to start automatically on system bootup
-                    command: pm2 list
+                    command: pm2 startup
 
                   - name: Start the backend using PM2
-                    command: pm2 start --name yolo_app npm -- start
+                    become: yes
+                    become_user: vagrant
+                    command: >
+                            chdir=/home/vagrant/backend
+                            pm2 start --name yolo_app npm -- start
 
                   - name: Save the list of process for automatic restart after a system reboot
                     command: pm2 save
             when: inventory_hostname == "backend"
+
+          # Install mongo on the db host
+          - block:
+                  - name: Import public GPG key for the latest stable version of MongoDB
+                    apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=7F0CEB10 state=present
+
+                  - name: Add MongoDB repository
+                    apt_repository: repo='deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multivers' state=present
+
+                  - name: Update cache
+                    apt: "update_cache=yes"
+
+                  - name: Install MongoDB
+                    apt: pkg=mongodb-org state=latest update_cache=yes
+
+            when: inventory_hostname == "mongodb"
+
+  handlers: 
+                  - name: Start MongoDB
+                    service: name=mongod state=started
