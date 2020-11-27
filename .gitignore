@@ -1,2 +1,3 @@
+# Ignore these folders
 .terraform/
 .vagrant/
