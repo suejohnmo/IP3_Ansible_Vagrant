@@ -21,7 +21,10 @@
 #### Create the virtual servers
 - Run the following vagrant commands in the terminal:
   - vagrant up
-  - vagrant provision (incase it does not automatically start the playbook)
+  - vagrant provision < vm-instance-name > (incase it does not automatically start the playbook)
+
+### Browse the app
+Open the browser and visit the following address http://192.168.60.4:3000
 
 
 
