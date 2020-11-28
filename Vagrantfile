@@ -14,20 +14,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Client App server
   config.vm.define "client" do |app|
-    app.vm.hostname = "lx-app.client"
+    app.vm.hostname = "lx-app-client.client"
     app.vm.network :private_network, ip: "192.168.60.4"
   end
 
   # Backend App server
   config.vm.define "backend" do |backend|
-    backend.vm.hostname = "lx-app.backend"
+    backend.vm.hostname = "lx-app-backend.backend"
     backend.vm.network :private_network, ip: "192.168.60.5"
+    backend.vm.network "forwarded_port", guest: 5000, host: 5000
   end
 
   # Mongodb server
   config.vm.define "mongodb" do |mongodb|
-    mongodb.vm.hostname = "lx-app.mongodb"
+    mongodb.vm.hostname = "lx-app-mongodb.mongodb"
     mongodb.vm.network :private_network, ip: "192.168.60.6"
+    mongodb.vm.network "forwarded_port", guest: 27017, host: 27017
   end
   
   # Ansible provisioning.
