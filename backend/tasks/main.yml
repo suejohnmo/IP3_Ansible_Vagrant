@@ -20,7 +20,6 @@
     regexp: 'mongo:27017/'
     replace: "192.168.60.6:27017/"
 
-
 - name: Install required modules in package.json
   command: >
           chdir=/home/vagrant/backend
