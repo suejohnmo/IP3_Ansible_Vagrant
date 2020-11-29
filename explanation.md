@@ -21,6 +21,7 @@
 - Run the following vagrant commands in the terminal:
   - vagrant up
   - vagrant provision < vm-instance-name > (incase it does not automatically start the playbook)
+  - vagrant status - confirm that all virtual machines are running
 
 #### Start the backend server
 - Login to the backend server and start the PM2 service, for some reason Ansible is not able to start it automatically.
@@ -29,7 +30,7 @@
 - pm2 start --name yolo_app npm -- start
 - pm2 list (confirm if the app is online)
 
-### Browse the app
+#### Browse the app
 Open the browser and visit the following address http://192.168.60.4:3000
 Add a new product by clicking the add products button and then refresh the browser to view the recently added product
 
