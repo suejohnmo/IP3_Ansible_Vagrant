@@ -1,3 +1,4 @@
+---
 - name: Install nodejs and npm on the backend host
   apt:
         state: present
@@ -45,3 +46,32 @@
 
 - name: Configure PM2 to start automatically on system bootup
   command: pm2 startup
+  
+- name: Allow all access to SSH
+  community.general.ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+ 
+- name: Allow everything and enable UFW
+  community.general.ufw:
+    state: enabled
+    policy: allow
+ 
+- name: Allow all access to 2222
+  community.general.ufw:
+    rule: allow
+    port: '2222'
+    proto: tcp
+ 
+- name: Allow all access to TCP port 5000
+  community.general.ufw:
+    rule: allow
+    port: '5000'
+    proto: tcp
+ 
+- name: Reboot the backend virtual machine
+  shell: sleep 5 && systemctl reboot
+  async: 300
+  poll: 0
+  ignore_errors: true

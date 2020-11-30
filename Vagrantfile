@@ -8,7 +8,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "geerlingguy/ubuntu2004"
   config.ssh.insert_key = false
   config.vm.provider :virtualbox do |v|
-    v.memory = 1024
+    v.memory = 512
     v.linked_clone = true
   end
 
@@ -16,6 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "client" do |app|
     app.vm.hostname = "lx-app-client.client"
     app.vm.network :private_network, ip: "192.168.60.4"
+    app.vm.network "forwarded_port", guest: 3000, host: 3000
   end
 
   # Backend App server
